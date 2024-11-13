@@ -3,7 +3,7 @@
 
 using namespace std;
 
-ostream&
+ostream&  //这里的假如说 是 cout << c1 << c2，先执行的是左边的'<<'然后是再执行右边的 '<<' ,所以为了保持左边的对象类型一致性需要返回ostream&
 operator << (ostream& os, const complex& x)
 {
   return os << '(' << real (x) << ',' << imag (x) << ')';

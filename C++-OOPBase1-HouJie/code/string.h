@@ -1,6 +1,23 @@
 #ifndef __MYSTRING__
 #define __MYSTRING__
 
+/**
+ * 关于new String发生的事情
+ * String *ps = new String("Hello"); 实际发生的是下面的三行
+ * void* mem = operator new( sizeof(String) )
+ * ps = static_cast<String*>(mem);
+ * ps->String:String("Hello");
+ * 
+ * 关于delete String 发生的事情
+ * deltete ps; 实际发生的事情是下面的两行
+ * String:~String(ps);        //释放class内部定义的指针 m_data
+ * operator delete(ps);       //释放ps指针指向的内存 delete内部调用了free(ps) 
+ * 
+ * 
+ * 
+ */
+
+
 class String
 {
 public:                                 
@@ -37,7 +54,7 @@ String::~String()
 inline
 String& String::operator=(const String& str)
 {
-   if (this == &str)
+   if (this == &str) //检测是否是自我赋值!
       return *this;
 
    delete[] m_data;
