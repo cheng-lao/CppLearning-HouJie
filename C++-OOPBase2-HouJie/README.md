@@ -149,7 +149,114 @@ member template，成员模板<br>
 specialization，模板特化<br>
 partial specialization，模板偏特化——个数的偏<br>
 partial specialization，模板偏特化——范围的偏<br>
+```cpp
+//偏特化分为两种：个数的偏特化和范围的偏特化
+//偏特化是指对模板中的某些参数进行特化，而不是对所有参数进行特化
+//特化主要是在泛化的过程当中会有一些特殊情况，特化就是为解决这些特殊情况而出现的。
+#include<iostream>
+using namespace std;
+
+//完全特化
+template<class key>
+struct specialization { 
+    
+};
+
+template<>
+struct specialization<char>
+{
+    char operator() (char p){ return p;}
+};
+
+//偏特化与完全特化不同，完全特化是为特定类型提供完全不同的实现，而偏特化则是为一部分类型提供不同的实现。
+//范围的偏特化，对原先的所有类型到 用一个指针指向某个类型
+template<typename T>
+struct C{   //原先的泛化是一个元素
+    // ...  
+};
+template<typename T>
+struct C<T*>{   //这里限定到指针，也可以是const 等等
+    // ...
+};
+
+//数量上的偏特化, 语法如下
+//针对到某个typename 需要改变，但是另一个可以不用改变
+template<typename T,typename Alloc=/*....*/>
+struct vector{
+    // ...  
+};
+
+template<typename Alloc=/**/>
+struct vector<bool, Alloc>{
+    //...
+}
+
+```
 template template parameter，模板模板参数<br>
+
+~~这个好难www~~
+```cpp
+//写法类似如下
+
+//第一种写法----Encoder: UTF-8
+#include<iostream>
+#include<vector>
+using namespace std;
+
+template<class T, template<typename U1, typename U2> 
+               class Container>// 这里其实限定了传进来的第二个类型必须是模板，并且模板所需要的参数只能有两个
+class Xcls{
+private:
+    Container<T, std::allocator<T>> c;
+public:
+    Xcls(): c(Container<T, std::allocator<T>>()) {  }
+};
+int main()
+{
+    Xcls<char, vector> pv; 
+    cout <<"Compile Success" << endl;
+    return 0;
+}
+
+//第二种写法----Encoder:UTF-8
+//
+template<class T, template<typename U1> 
+               class Container> // 第二个参数必须是一个模板类
+class Xcls{
+private:
+    Container<T> c;
+public:
+    Xcls(): c(Container<T>()) {  }
+};
+
+template<typename T>
+class A { };
+
+int main()
+{
+    // Xcls<char, vector> pv; //类模板 "std::vector" 与 模板 template 参数 "Container" 不兼容
+    Xcls<char, A> pa;
+    //自己实现模板类的可以编译，但是STL标准模板库当中就不行!
+    cout <<"Compile Success" << endl;
+    return 0;
+}
+
+
+// 最后看一个 不是模板模板参数的例子
+// 模板模板参数的关键是一个类的模板参数 也是一个模板，
+// 但是在下面stack当中 第二个类型参数传递进来的时候，其实已经确定了类型是什么了，是一个确定的类型参数，而不是模板参数。
+// 所以不是模板
+template <class T, class Sequence = deque<T>>
+class stack{
+    friend bool operator== <> (const stack&, const stack&);
+    friend bool operator< <> (const stack&, const stack&);
+    
+protected:
+    Sequence c;
+}
+
+```
+
 variadic templates（since C++11）<br>
 auto（since C++11）<br>
 ranged-base for（since C++11）<br>

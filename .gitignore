@@ -1,4 +1,9 @@
 *temp*
 *.exe
+*.o
+*.obj
+*.dll
+*.so
+*.dylib
 .vscode
 *.sln
