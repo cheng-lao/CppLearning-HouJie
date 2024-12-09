@@ -133,11 +133,12 @@ namespace jj05
 class Fraction
 {
 public:
-	explicit Fraction(int num, int den=1) 
+	explicit Fraction(int num, int den=1) 	//explicit 告诉编译器只有显式的调用构造函数的情况下才能执行，不让编译器做潜在的类型转换
 	  : m_numerator(num), m_denominator(den)
 	{ cout << m_numerator << ' ' << m_denominator << endl; }
 	
  	operator double() const { 
+		cout<<"Fraction::double() const function called!"<<endl;
       return (double)m_numerator / m_denominator; 
  	}
  	
@@ -216,12 +217,18 @@ void test_reference()
 //-------------------------------------------------------------
 int main(int argc, char** argv) 
 {
-	std::cout << __cplusplus << endl;	//199711 or 201103
+	// std::cout << __cplusplus << endl;	//199711 or 201103
 	
-	jj01::test_member_template();	
-	jj02::test_template_template_parameters_1();	
-	jj03::test_template_template_parameters_2();
-	jj04::test_object_model();		
-	jj05::test_conversion_functions();
-	jj06::test_reference();	
+	// jj01::test_member_template();	
+	// jj02::test_template_template_parameters_1();	
+	// jj03::test_template_template_parameters_2();
+	// jj04::test_object_model();		
+	// jj05::test_conversion_functions();
+	// jj06::test_reference();	
+
+	jj05::Fraction f(3, 5);
+	double d = 4 + f;
+	cout<<d<<endl;
+
+
 }
