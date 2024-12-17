@@ -136,19 +136,19 @@ Part II继续探讨更多相关主题，并加上低阶的对象模型（Object 
 ### Part II
 
 **绪论**<br>
-Conversion function（转换函数）<br>
-Non-explicit one-argument constructor<br>
-Pointer-like classes，关于智能指针<br>
-Pointer-like classes，关于迭代器<br>
-Function-like classes，所谓仿函数<br>
-标准库中的仿函数的奇特模样<br>
-namespace经验谈<br>
-class template，类模板<br>
-function template，函数模板<br>
-member template，成员模板<br>
-specialization，模板特化<br>
-partial specialization，模板偏特化——个数的偏<br>
-partial specialization，模板偏特化——范围的偏<br>
+- Conversion function（转换函数）<br>
+- Non-explicit one-argument constructor<br>
+- Pointer-like classes，关于智能指针<br>
+- Pointer-like classes，关于迭代器<br>
+- Function-like classes，所谓仿函数<br>
+- 标准库中的仿函数的奇特模样<br>
+- namespace经验谈<br>
+- class template，类模板<br>
+- function template，函数模板<br>
+- member template，成员模板<br>
+- specialization，模板特化<br>
+- partial specialization，模板偏特化——个数的偏<br>
+- partial specialization，模板偏特化——范围的偏<br>
 ```cpp
 //偏特化分为两种：个数的偏特化和范围的偏特化
 //偏特化是指对模板中的某些参数进行特化，而不是对所有参数进行特化
@@ -192,7 +192,7 @@ struct vector<bool, Alloc>{
 }
 
 ```
-template template parameter，模板模板参数<br>
+- template template parameter，模板模板参数<br>
 
 ~~这个好难www~~
 ```cpp
@@ -257,26 +257,252 @@ protected:
 
 ```
 
-variadic templates（since C++11）<br>
-auto（since C++11）<br>
+- variadic templates（since C++11）<br>
+```cpp
+void print(){
+    
+}
+
+template<typename T,typename... Types>
+void print(const T& first, const Types&... args){
+    cout<< first <<endl;
+    print(args);
+}
+//语法糖系列之一，模板参数数量可变
+```
+- auto（since C++11）<br>
+```cpp
+// 又是一个新的语法糖 auto
+// 使用的时候必须是能够立即给变量赋值的
+list<int> c;
+// ...
+auto a = find(c.begin(), c.end(), target);
+
+auto b;
+b = find(c.begin(), c.end(), target);
+```
+
 ranged-base for（since C++11）<br>
+
 reference<br>
-Composition（复合）关系下的构造和析构<br>
-Inheritance（继承）关系下的构造和析构<br>
-Inheritance+Composition关系下的构造和析构<br>
-对象模型（Object Model）：关于vptr和vtbl<br>
-对象模型（Object Model）：关于this<br>
-对象模型（Object Model）：关于Dynamic Binding<br>
-谈谈const<br>
-关于new，delete<br>
-重载 ::operator new，::operator delete<br>
-重载 ::operator new[]，::operator delete[]<br>
-重载 member operator new/delete<br>
-重载 member operator new[]/delete[]<br>
-示例<br>
-重载new()，delete()<br>
-示例<br>
-basic_string使用new（extra）扩充申请量
+![alt text](images/reference.png)
+```cpp
+//reference是指代表的意思
+//const是函数签名的一部分呢，也就是说，两个函数如果函数参数相同，但是一个加了const，另一个没有加上const，就是两个不一样的函数，可以共存。
+#include<iostream>
+
+using namespace std;
+
+double imag(const double& im){
+    cout<<"reference "<<im<<endl;
+}
+double imag(const double im) 
+{
+    cout<<"value "<<im<<endl;
+}
+
+int main(){
+
+    imag(3.14);// 多个 重载函数 "imag" 实例与参数列表匹配:C/C++(308)
+
+    // reference更像是一个代表，
+    // 当指定了一个变量a引用另一个变量b的时候，这个时候a就b绑定死了，不能再去引用其他变量了
+    int b = 10;
+    int& a = b;
+    int c = 100;
+    a = c;  //不能再变化引用的对象了，所以这里是单纯的赋值
+    cout<<"a is "<<a<<" b is "<<b<<" c is "<<c<<endl;
+    return 0;
+}
+```
+
+- Composition（复合）关系下的构造和析构<br>
+- Inheritance（继承）关系下的构造和析构<br>
+- Inheritance+Composition关系下的构造和析构<br>
+- 对象模型（Object Model）：关于vptr和vtbl<br>
+![alt text](./images/vptr-vtbl.png)
+```cpp
+//老师课堂上给出的的模型代码示例
+//产生多态的三个条件缺一不可:
+/*
+1. 通过指针调用类函数
+2. 必须是up-cast，也就是基类的指针指向子类的new 创建的对象，只要是指向子类的指针就可以
+3. 必须是调用virtual function, 所以必须要有virtual function的存在，
+
+
+继承对于类方法是调用权的继承，只有加入了virtual 关键字的函数
+才能被子类继承下去(前提是子类也实现了这个虚函数)，在多态的产生当中调用的就是子类实现的方法，如果子类没有实现，那就需要回到父类看是否实现，找一个离自己当前类最近的父类查看是否实现，如果有就选最近的父类实现函数。
+
+*/
+
+#include<iostream>
+#include<list>
+using namespace std;
+
+class A{
+public:
+    virtual void vfunc1() { cout<< "this is A's vfunc1 "<<endl; }
+    virtual void vfunc2() { cout<< "this is A's vfunc2 "<<endl; }
+    void func1() { cout<< "this is A's func1"<<endl; }
+    void func2() { cout<< "this is A's func2"<<endl; }
+private:
+    int m_data1, m_data2;
+};
+
+class B : public A{
+public:
+    void vfunc1() override {
+        cout<< "this is B's vfunc1" << endl;
+    }
+    void func2() {
+        cout<< "this is B'func2"<<endl;
+    }
+private:
+    int m_data3;
+};
+
+class C: public B{
+public:
+    virtual void vfunc1(){
+        cout<< "this is C's vfunc2 "<<endl;
+    }
+
+    // @override
+    void func1(){
+        cout<< "this is C's func1 "<<endl;
+    }
+
+private:
+    int m_data4;
+};
+
+int main(int argc, char const *argv[])
+{
+    A a = C();  // 不通过指针调用子类，不会产生虚指针的用途。
+    A* ap = new C();
+    ap->func1();
+    ap->func1();
+    ap->vfunc1();
+    ap->vfunc2();
+    // 查看对象 a 的虚指针内容
+    void** vptr_a = (void**)(void*)&a;
+    cout << "vptr of a: " << vptr_a << endl;
+
+    // 查看指针 ap 的虚指针内容
+    void** vptr_ap = (void**)(void*)ap;
+    cout << "vptr of ap: " << vptr_ap << endl;
+    cout << ((vptr_ap)[0]) << endl;
+
+    cout<<" sizeof(a) is " <<sizeof(a)<<endl;
+    cout<<" sizeof(ap) is "<<sizeof(ap)<<endl;
+
+    return 0;
+}
+
+```
+
+- 对象模型（Object Model）：关于this<br>
+- 对象模型（Object Model）：关于Dynamic Binding<br>
+- 谈谈const<br>
+**当一个类的某个成员函数 既有 const版本, 也有non-const版本的时候那么只有const对象才能调用 const版本的成员函数，non-const的对象才能调用non-const版本的成员函数，这样的规定是为了保证在不同的情况下实现不同的功能**
+![cpp-const知识点](./images/const.png)
+```cpp
+
+// 当一个类的某个成员函数 既有 const版本, 也有non-const版本的时候
+// 那么只有const对象才能调用 const版本的成员函数，non-const的对象才能调用non-const版本的成员函数，这样的规定是为了保证在不同的情况下实现不同的功能
+//如下所示，在对字符串操作的时候，往往多个相同内容的字符串变量是共享同一个字符串的地址
+//但是如果其中一个变量想要对字符串进行修改，就需要进行拷贝字符串到一个新的位置然后再修改写的操作，
+//这样的话就必须调用non-const的成员函数，才能实现。
+char T
+operator[] (size_type pos) const
+{.... /* 不考虑Copy on Write */} 
+
+operator[] (size_type pos)
+{.... /* 必须考虑Copy on Write*/}
+
+```
+
+- 关于new，delete<br>
+- 重载 ::operator new，::operator delete<br>
+- 重载 ::operator new[]，::operator delete[]<br>
+- 重载 member operator new/delete<br>
+- 重载 member operator new[]/delete[]<br>
+```cpp
+#include <iostream>
+using namespace std;
+
+/*
+operator new 调用情况，使用表达式的new 的时候会调用operator new
+如：
+body* a = new body();
+这句话等效于如下三个
+void* p = operator new(sizeof(body));
+p = static_cast(body*)(p);
+p->body::body();        //调用构造函数
+
+delete a; 等效于如下两行
+a->~body();
+operator delete(a);
+
+*/
+
+// 设计一个 重载了operator new和 operator delete的类
+class body
+{
+public:
+    body() : h(0) {}
+    body(int h) : h(h) {}
+
+    void *operator new(size_t size)
+    {
+        printf("Through body's operator new!\n");
+        return malloc(size);
+    }
+
+    void *operator new[](size_t size)
+    {
+        printf("Through body's operator new[]\n");
+        return malloc(size);
+    }
+
+    void operator delete(void *f, size_t size)
+    {
+        printf("through body's operator delete!\n");
+        free(f);
+    }
+
+    void operator delete[](void *f, size_t size_t)
+    {
+        printf("Through body's operator delete[]\n");
+        free(f);
+    }
+
+private:
+    int h;
+};
+
+void test_overload_operator_new_and_array_new();
+
+int main()
+{
+    body a;      // 没有经过operator delete 函数
+    body &b = a; // 没有经过operator new函数
+
+    body *c = new body(); // 触发operator new函数
+    delete c;             // 触发operator delete函数
+
+    body *clist = new body[3];
+    delete[] clist;
+
+    test_overload_operator_new_and_array_new();
+
+    return 0;
+}
+```
+- 示例<br>
+- 重载new()，delete()<br>
+- 示例<br>
+- basic_string使用new（extra）扩充申请量
 
 -- the end
 
