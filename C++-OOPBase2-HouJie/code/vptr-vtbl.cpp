@@ -49,8 +49,9 @@ int main(int argc, char const *argv[])
     ap->vfunc1();
     ap->vfunc2();
     // 查看对象 a 的虚指针内容
-    void** vptr_a = (void**)(void*)&a;
+    void** vptr_a = (void**)(void*)&a;  // 第一个变量就是虚指针
     cout << "vptr of a: " << vptr_a << endl;
+    cout << "address of a: "<< &a << endl;
 
     // 查看指针 ap 的虚指针内容
     void** vptr_ap = (void**)(void*)ap;

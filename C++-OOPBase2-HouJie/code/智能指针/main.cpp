@@ -2,8 +2,7 @@
 #include "shared_ptr.hpp"
 #include "unique_ptr.hpp" // 保留 unique_ptr 用于对比
 #include "weak_ptr.hpp"
-
-using namespace std;
+#include <stdexcept>  
 void test_1();
 
 // 测试用类
@@ -19,18 +18,18 @@ int main(int argc, char const *argv[])
 {
     // --- Unique Ptr 测试  ---
     std::cout << "--- unique_ptr 演示 ---\n";
-    unique_ptr<Test> up1(new Test());
+    cyj::unique_ptr<Test> up1(new Test());
     up1->hello();
-    unique_ptr<Test> up2 = std::move(up1); 
+    cyj::unique_ptr<Test> up2 = std::move(up1); 
     if (!up1.get()) std::cout << "up1 已失去所有权\n";
     up2->hello();
 
     // --- Shared Ptr 测试 ---
     std::cout << "\n--- shared_ptr 演示 ---\n";
-    shared_ptr<Test> sp1(new Test());
+    cyj::shared_ptr<Test> sp1(new Test());
     std::cout << "sp1 use_count: " << sp1.use_count() << "\n"; // 1
     {
-        shared_ptr<Test> sp2 = sp1;
+        cyj::shared_ptr<Test> sp2 = sp1;
         std::cout << "sp1 use_count: " << sp1.use_count() << "\n"; // 2
         sp2->hello();
     } // sp2 析构，引用计数减 1
@@ -40,10 +39,10 @@ int main(int argc, char const *argv[])
     std::cout << "\n--- weak_ptr 演示 ---\n";
     
     // 1. 创建 shared_ptr
-    shared_ptr<Test> wsp1(new Test());
+    cyj::shared_ptr<Test> wsp1(new Test());
     
     // 2. 用 weak_ptr 观测它
-    weak_ptr<Test> wp1(wsp1);
+    cyj::weak_ptr<Test> wp1(wsp1);
     
     std::cout << "wp1 expired? " << (wp1.expired() ? "Yes" : "No") << "\n"; // No
     
@@ -56,7 +55,7 @@ int main(int argc, char const *argv[])
 
     // 4. 销毁原始的 shared_ptr
     std::cout << "释放 wsp1...\n";
-    wsp1 = shared_ptr<Test>(nullptr);
+    wsp1 = cyj::shared_ptr<Test>(nullptr);
     // 此时 Test 对象应该被析构，但 ControlBlock 还在，因为 wp1 还在引用它
 
     // 5. 再次检测 expired
@@ -70,9 +69,9 @@ int main(int argc, char const *argv[])
     }
 
     std::cout << "\n--- unique_ptr reset 演示 ---\n";
-    unique_ptr<Test> up_reset(new Test());
+    cyj::unique_ptr<Test> up_reset(new Test());
     up_reset->hello();
-
+    std::cout<< "...."<< std::endl;
     // 正常 reset
     up_reset.reset(new Test());
     up_reset->hello();
@@ -90,9 +89,9 @@ int main(int argc, char const *argv[])
 void test_1(){
     // --- Shared Ptr 移动测试 ---
     std::cout << "\n--- shared_ptr 移动演示 ---\n";
-    shared_ptr<Test> sp_move(new Test());
+    cyj::shared_ptr<Test> sp_move(new Test());
     std::cout << "sp_move use_count: " << sp_move.use_count() << "\n"; // 1
-    shared_ptr<Test> sp_move2 = std::move(sp_move);
+    cyj::shared_ptr<Test> sp_move2 = std::move(sp_move);
     std::cout << "sp_move2 use_count: " << sp_move2.use_count() << "\n"; // 1
     if (!sp_move) std::cout << "sp_move 已失去所有权\n";  // output 
 
@@ -106,14 +105,14 @@ void test_1(){
     std::cout << "\n--- 循环引用演示 ---\n";
     class Node {
     public:
-        shared_ptr<Node> next;
-        weak_ptr<Node> prev;  // 用 weak 打破循环
+        cyj::shared_ptr<Node> next;
+        cyj::weak_ptr<Node> prev;  // 用 weak 打破循环
         ~Node() { std::cout << "Node 析构\n"; }
     };
 
     {
-        shared_ptr<Node> node1(new Node());
-        shared_ptr<Node> node2(new Node());
+        cyj::shared_ptr<Node> node1(new Node());
+        cyj::shared_ptr<Node> node2(new Node());
         node1->next = node2;
         node2->prev = node1;  // 如果 prev 是 shared_ptr，会循环不析构
     }  // 出作用域，应析构两个 Node

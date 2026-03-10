@@ -1,7 +1,8 @@
 #pragma once
 #include "shared_ptr.hpp"
-#include <stdexcept>  
-using namespace std;
+
+// weak_ptr主要是辅助
+namespace cyj{
 
 template<typename T>
 class weak_ptr {
@@ -51,7 +52,7 @@ public:
         return !this->cb || this->cb->shared_count == 0;           
     }
 
-    // 8. 提升为 shared_ptr
+    // 8. 提升为 shared_ptr 引用计数在shared_ptr的私有构造函数当中会使用
     shared_ptr<T> lock() {
         if(this->cb && this->cb->shared_count > 0){
             return shared_ptr<T>(this->ptr, this->cb);
@@ -86,3 +87,4 @@ private:
         }
     }
 };
+}

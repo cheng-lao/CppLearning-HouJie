@@ -92,7 +92,7 @@ private:
         Image::addPrototype(&SpotImage::prototypeInstance);
     }
     SpotImage(int):Image("Spot"){
-        
+        count++;
     }
     Image* clone() const override {
         return new SpotImage();

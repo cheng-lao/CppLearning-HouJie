@@ -145,7 +145,33 @@ Part II继续探讨更多相关主题，并加上低阶的对象模型（Object 
 - namespace经验谈<br>
 - class template，类模板<br>
 - function template，函数模板<br>
+> 代码演示内容
+```cpp
+class stone 
+{
+public:
+    stone(int w,int h, int we): _w(w), _h(h), _weight(we){ } 
+    bool operator<(const stone& rhs) const{
+        return _weight < rhs._weight    //重载<运算符
+    }
+private:
+    int _w, _h, _weight;
+};
+template<class T>
+inline const T& min(const T&a, const T&b){
+    return b < a ? b : a;   //在比较的时候需要调用stone重载的<运算符
+}
+int main(){
+    stone r1(2, 3), r2(3, 3), r3;
+    r3 = min(r1, r2);// 这里会调用模板函数，进行类型的自动推导
+}
+```
+
 - member template，成员模板<br>
+> ![成员模板的一个例子](./images/成员模板.png)
+> 成员模板可以认为是类中的成员变量是带有模板参数的
+> 实现的内容如上图所示，回答下面的问题，可以将有鲫鱼和麻雀组成的pair拷贝到一个由鱼类和麻雀组成的pair中，因为可以在拷贝构造函数当中将 `p.first`(鲫鱼类型) 赋值给 `first`(鱼类)，也就是 `Base1* p = new Derived1()`
+> 但是反过来就不行，因为反过来**不能将父类赋值给子类**
 - specialization，模板特化<br>
 - partial specialization，模板偏特化——个数的偏<br>
 - partial specialization，模板偏特化——范围的偏<br>
@@ -331,8 +357,14 @@ int main(){
 
 
 继承对于类方法是调用权的继承，只有加入了virtual 关键字的函数
-才能被子类继承下去(前提是子类也实现了这个虚函数)，在多态的产生当中调用的就是子类实现的方法，如果子类没有实现，那就需要回到父类看是否实现，找一个离自己当前类最近的父类查看是否实现，如果有就选最近的父类实现函数。
+才能被子类继承下去(前提是子类也实现了这个虚函数)，在多态的产生当中调用的就是子类实现的方法，
+如果子类没有实现，那就需要回到父类看是否实现，找一个离自己当前类最近的父类查看是否实现，如果有就选最近的父类实现函数。
 
+
+补充一下：静态绑定和动态绑定的概念，如果程序调用(call指令)后面的值是一个定死的数字，也就是在编译阶段就已经确定好调用函数位置。这种情况是静态绑定。
+与之对应的是动态绑定，call指令后面跟的是一个寄存器编号，这个时候调用的函数地址是在函数中执行时确定的。多态的情况就是动态绑定，其余的均是静态绑定。
+
+另外在动态绑定的时候，调用函数执行的时候需要判断哪个类的成员函数，一般都是new关键字后面的那个类。而静态绑定是
 */
 
 #include<iostream>
@@ -427,6 +459,14 @@ operator[] (size_type pos)
 - 重载 ::operator new[]，::operator delete[]<br>
 - 重载 member operator new/delete<br>
 - 重载 member operator new[]/delete[]<br>
+> ![重载new_delete_成员函数](./images/overloading_new_delete.png)
+> 这里是关于重载一个类当中的new和delete函数，可以修改原先的成员列表，添加新的参数。
+> 但是有一定的要求
+> 1. 重载`operator new`第一个参数必须是`size_t`参数，这个参数表示要申请的内存空间的大小（这个是已经计算好的）
+> 2. 重载一个`operator new` 必须要相对应得重载一个与之参数列表相同的`operator delete`函数。重载`operator delete`函数必须第一个参数是`void* p`表示要回收的那片内存空间。
+> 3. 重载的`operator delete`函数只有当对应参数列表的`operator new`函数和构造函数执行过程当中出错的时候才会被调用。
+
+
 ```cpp
 #include <iostream>
 using namespace std;
@@ -503,6 +543,15 @@ int main()
 - 重载new()，delete()<br>
 - 示例<br>
 - basic_string使用new（extra）扩充申请量
+
+
+- 智能指针补充[知乎原文链接](https://zhuanlan.zhihu.com/p/672745555)
+> ![shared_ptr内部结构图](./images/share_ptr_结构图.png)
+> `shared_ptr`是一个内部维护一个引用计数，其只有两个指针成员，一个指针是所管理的数据的地址；还有一个指针是控制块的地址，包括引用计数、weak_ptr计数、删除器(Deleter)、分配器(Allocator)。
+> 因为不同shared_ptr指针需要共享相同的内存对象，因此引用计数的存储是在堆上的。而unique_ptr只有一个指针成员，指向所管理的数据的地址。因此一个shared_ptr对象的大小是raw_pointer大小的两倍。
+> 
+> 
+
 
 -- the end
 
